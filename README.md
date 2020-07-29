@@ -73,15 +73,38 @@ podman run --rm -p 8000:80 -v $(pwd):/var/www/html:Z httpd
 
 ### Install to a disk via Anaconda
 
+The installer, anaconda, on the `boot.iso` installation medium is can
+be used to install the commit. To configure the installer to use the
+newly build commit, a "kickstart" configuration [`edge.ks`](edge.ks),
+is used. It is setup for non-interactive, text-based installation.
+The important line within the kickstart is the `ostreesetup` directive
+which instructs the installer to fetch and deploy the commit.
+Additionally a user `core` (pw: `edge`) is created.
+
+For demonstration purposes we create an empty `qcow2` with a size of
+`5G`, to act as the installation target:
+
 ```
 qemu-img create -f qcow2 disk.qcow2 5G
 ```
 
+The installer is run with qemu:
 ```
-qemu-system-x86_64 -m 2048 -enable-kvm -drive file=disk.qcow2 -device virtio-net-pci,netdev=n0 -netdev user,id=n0,net=10.0.2.0/24 -cdrom rhel-8.3-beta-1-x86_64-boot.iso
+qemu-system-x86_64 \
+  -m 2048 \
+  -enable-kvm \
+  -device virtio-net-pci,netdev=n0 \
+  -netdev user,id=n0,net=10.0.2.0/24 \
+  -drive file=disk.qcow2 \
+  -cdrom rhel-8.3-beta-1-x86_64-boot.iso
 ```
 
+To use the prepared kicksstart file, instead of the default one of
+the `boot.iso`, an additional kernel parameter is needed (hit `TAB`
+on the `Install ...` entry):
 
 ```
 inst.ks=http://10.0.2.2:8000/edge.ks
 ```
+
+![screenshot](screenshots/install.png)
