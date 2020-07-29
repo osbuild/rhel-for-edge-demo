@@ -1,0 +1,9 @@
+
+# the commit and its contents
+*-commit.tar
+repo/
+compose.json
+
+# images and isos
+*.qcow2
+*.iso
