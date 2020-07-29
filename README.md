@@ -92,8 +92,8 @@ go run main.go
 Or a container can be prepared to serve the commit.
 
 ```
-podman build -t httpd .
-podman run --rm -p 8000:80 -v $(pwd):/var/www/html:Z httpd
+podman build -t edge-server .
+podman run --rm -p 8000:80 edge-server
 ```
 
 ### Install to a disk via Anaconda
