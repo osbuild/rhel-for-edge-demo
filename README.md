@@ -2,7 +2,10 @@
 
 ## Requirements
 
-[RHEL 8.3 Beta](https://access.redhat.com/products/red-hat-enterprise-linux/beta)
+Image Builder is available via [RHEL 8.3 Beta](https://access.redhat.com/products/red-hat-enterprise-linux/beta).
+The *KVM Guest Image* is used to install Image Builder and build a
+RHEL for Edge commit.
+The *Boot ISO* is then used to install that commit.
 
 Name            | Filename
 ----------------|---------------------------------
@@ -14,11 +17,18 @@ KVM Guest Image | rhel-8.3-beta-1-x86_64-kvm.qcow2
 
 ### Run RHEL beta via VM script
 
+A small helper script is used to start the RHEL 8.3 Guest Image. It uses
+cloud init to provision a root use (password `r`). The script also enables
+port forwarding for the ssh and web console ports (`22` → `2222` (host) and
+`9090` → `9091`).
+
 ```
 vm --persist rhel-8.3-beta-1-x86_64-kvm.qcow2
 ```
 
 ### Register the system
+
+To be able to install packages the VM must be registered via:
 
 ```
 subscription-manager register --username <redhat_login_username> --password <redhat_login_password>
@@ -29,24 +39,29 @@ subscription-manager attach
 ```
 
 ### Install Image Builder
+
 ```
 yum install osbuild-composer cockpit-composer
 ```
 
 ### Enable web console
+The Image Builder front end is a plugin to the web console (*cockpit*),
+which needs to be enabled.
 ```
 systemctl enable --now cockpit.socket
 ```
 
 ## Build a RHEL for Edge commit
 
-URL to connect to is: http://localhost:9091
+Navigate to the web console via a browser on the host. URL: http://localhost:9091
+There, *Image Builder* is found under *Apps* in the right menu.
 
- 1. Create a Blueprint ![screenshot](screenshots/blueprint.png)
- 2. Add packages (optionally) ![screenshot](screenshots/packages.png)
- 3. Create Image ![screenshot](screenshots/create.png)
- 4. Wait
- 5. Tarball with the commit is ready to download ![screenshot](screenshots/download.png)
+ 1. Activate the Image Builder service.
+ 2. Create a Blueprint ![screenshot](screenshots/blueprint.png)
+ 3. Add packages (optionally) ![screenshot](screenshots/packages.png)
+ 4. Create Image ![screenshot](screenshots/create.png)
+ 5. **Wait**
+ 6. Tarball with the commit is ready to download ![screenshot](screenshots/download.png)
 
 ## Inspect the commit
 
