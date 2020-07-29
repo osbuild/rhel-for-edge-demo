@@ -133,3 +133,11 @@ inst.ks=http://10.0.2.2:8000/edge.ks
 ```
 
 ![screenshot](screenshots/install.png)
+
+As an alternative to supplying the kickstart location via the kernel
+command line, the `mkksiso` (`lorax` package) can be used to inject
+the kickstart file into the boot iso:
+
+```
+mkksiso edge.ks rhel-8.3-beta-1-x86_64-boot.iso boot.iso
+```
