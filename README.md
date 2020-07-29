@@ -81,6 +81,16 @@ rpm-ostree db list rhel/8/x86_64/edge --repo=repo
 
 ### Setup a webserver
 
+In order to fetch the commit from the (generic) installer, it needs to be
+served via HTTP. This can be done either via a small Go binary (`main.go`),
+that can be run with:
+
+```
+go run main.go
+```
+
+Or a container can be prepared to serve the commit.
+
 ```
 podman build -t httpd .
 podman run --rm -p 8000:80 -v $(pwd):/var/www/html:Z httpd
