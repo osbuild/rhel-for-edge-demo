@@ -1,0 +1,9 @@
+#cloud-config
+users:
+  - default
+  - name: root
+    gecos: RR
+chpasswd:
+  list: |
+    root:r
+  expire: False
