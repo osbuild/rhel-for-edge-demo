@@ -1,4 +1,8 @@
-# RHEL for Edge with Image Builder Demo
+# Building RHEL for Edge with Image Builder
+
+This demonstrates the use of [Image Builder](https://www.osbuild.org/) to
+created (custom) RHEL for Edge [OSTree](https://ostree.readthedocs.io/en/latest/)
+commits and how to install those to a disk or an image.
 
 ## Requirements
 
