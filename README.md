@@ -92,7 +92,7 @@ go run main.go
 Or a container can be prepared to serve the commit.
 
 ```
-podman build -t edge-server .
+podman build -t edge-server --build-arg commit=<uuid>-commit.tar .
 podman run --rm -p 8000:80 edge-server
 ```
 
