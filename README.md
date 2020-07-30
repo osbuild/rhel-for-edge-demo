@@ -72,6 +72,39 @@ commits / images. The UI flow is as follows:
  5. **Wait**
  6. Tarball with the commit is ready to download ![screenshot](screenshots/download.png)
 
+### Build via the command line
+
+Commits can also build from the command line, via the help of
+the `composer-cli` tool (`yum install composer-cli`).
+
+A new blueprint is created from a TOML file, e.g. [`blueprint.toml`](blueprint.toml):
+
+```
+$> composer-cli blueprints push blueprint.toml
+```
+
+From this a compose is created for the previously created blueprint
+(`Edge`). The type of the compose here is `rhel-edge-commit`. The
+UUID if the compose can later be used to obtain the artifact.
+
+```
+$> composer-cli compose start-ostree Edge rhel-edge-commit "" ""
+Compose <uuid> added to the queue
+```
+
+The status of a compose can be inspected via:
+
+```
+$> composer-cli compose status
+<uuid> RUNNING  Thu Jul 30 09:36:14 2020 Edge            0.0.1 rhel-edge-commit
+```
+
+Finally the commit can be downloaded via
+```
+$> composer-cli compose image <uuid>
+<uuid>-commit.tar: 633.73 MB
+```
+
 ## Inspect the commit
 
 Extract the downloaded tarball via `tar xvf <uuid>-commit.tar`. It should
