@@ -135,7 +135,7 @@ qemu-system-x86_64 \
 
 To use the prepared kicksstart file, instead of the default one of
 the `boot.iso`, an additional kernel parameter is needed (hit `TAB`
-on the `Install ...` entry):
+on the `Install Red Hat Enterprise Linux 8.3` entry):
 
 ```
 inst.ks=http://10.0.2.2:8000/edge.ks
