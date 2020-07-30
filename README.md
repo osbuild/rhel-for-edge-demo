@@ -59,11 +59,16 @@ systemctl enable --now cockpit.socket
 
 Navigate to the web console via a browser on the host. URL: http://localhost:9091
 There, *Image Builder* is found under *Apps* in the right menu.
+Images, or in our case,commits, are generated from so called *Blueprints*,
+which are customizations that are applied to existing *Image Types*,
+e.g. "RHEL for Edge commit". Internally there is a queue that will
+distribute compose requests to workers, which in turn are building the
+commits / images. The UI flow is as follows:
 
  1. Activate the Image Builder service.
  2. Create a Blueprint ![screenshot](screenshots/blueprint.png)
  3. Add packages (optionally) ![screenshot](screenshots/packages.png)
- 4. Create Image ![screenshot](screenshots/create.png)
+ 4. Create the commit ![screenshot](screenshots/create.png)
  5. **Wait**
  6. Tarball with the commit is ready to download ![screenshot](screenshots/download.png)
 
