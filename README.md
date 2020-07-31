@@ -1,8 +1,8 @@
 # Building RHEL for Edge with Image Builder
 
 This demonstrates the use of [Image Builder](https://www.osbuild.org/) to
-created (custom) RHEL for Edge [OSTree](https://ostree.readthedocs.io/en/latest/)
-commits and how to install those to a disk or an image.
+create a (custom) RHEL for Edge [OSTree](https://ostree.readthedocs.io/en/latest/)
+commit and how to install those to a disk or an image.
 
 ## Requirements
 
@@ -22,7 +22,7 @@ KVM Guest Image | rhel-8.3-beta-1-x86_64-kvm.qcow2
 ### Run RHEL beta via VM script
 
 A small helper script is used to start the RHEL 8.3 Guest Image. It uses
-cloud init to provision a root use (password `r`). The script also enables
+cloud init to provision a root user (password `r`). The script also enables
 port forwarding for the ssh and web console ports (`22` → `2222` (host) and
 `9090` → `9091`).
 
