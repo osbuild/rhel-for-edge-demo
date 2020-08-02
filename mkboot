@@ -1,0 +1,131 @@
+#!/usr/bin/python3
+
+import argparse
+import contextlib
+import os
+import pycdlib
+import shutil
+import subprocess
+import sys
+import tempfile
+from string import Template
+
+
+@contextlib.contextmanager
+def mount_iso(iso, path):
+
+    subprocess.run(["mount", "-t", "iso9660", "-o", "loop,ro", iso, path],
+                   check=True)
+
+    try:
+        yield path
+    finally:
+        subprocess.run(["umount", path])
+
+
+def delete_generated(path):
+    for root, dirs, files in os.walk(path):
+        for f in files:
+            if f in ["TRANS.TBL", "boot.cat", "boot.catalog"]:
+                t = os.path.join(root, f)
+                print(f"unlink {t}")
+                os.unlink(t)
+
+
+def make_iso(path, label, output, workdir):
+    cmd = [
+        "/usr/bin/xorrisofs"
+    ]
+
+    cmd += [
+        "-verbose",
+        "-V", label,
+    ]
+
+    cmd += [
+        "-b", "isolinux/isolinux.bin",
+        "-c", "isolinux/boot.cat",
+        "-no-emul-boot",
+        "-boot-load-size", "4",
+        "-boot-info-table"
+    ]
+
+    cmd += [
+        "-rock", "-joliet"
+    ]
+
+    cmd += [
+        "-eltorito-alt-boot",
+        "-e", "images/efiboot.img",
+        "-no-emul-boot",
+        "-isohybrid-gpt-basdat",
+    ]
+
+    #cmd += [
+    #    "-isohybrid-mbr", "/usr/share/syslinux/isohdpfx.bin",
+    #]
+
+    cmd += [
+        '-o', output,
+        path
+    ]
+
+    print(cmd)
+    subprocess.run(cmd,
+                   cwd=workdir,
+                   check=True)
+
+
+def get_label(path):
+    try:
+        iso = pycdlib.PyCdlib()
+        iso.open(path)
+        label = iso.pvd.volume_identifier.decode("UTF-8").strip()
+    except pycdlib.PyCdlibException as e:
+        label = ""
+    return label
+
+
+def write_bootconfig(source, dest, **subst):
+    with open(source, "r") as f:
+        tpl = Template(f.read())
+        data = tpl.substitute(**subst)
+    print(data)
+    with open(dest, "w") as f:
+        f.write(data)
+
+
+def main():
+    bootiso = sys.argv[1]
+    filename = os.path.abspath("bootiso.iso")
+
+    label = get_label(bootiso)
+    print(f"Using {label}")
+
+    with tempfile.TemporaryDirectory(dir="/var/tmp") as tmp:
+        mountpath = os.path.join(tmp, "mount")
+        isopath = os.path.join(tmp, "iso")
+        os.makedirs(mountpath)
+        os.makedirs(isopath)
+
+        with mount_iso(bootiso, mountpath) as path:
+            subprocess.run(["cp", "-a", f"{path}/.", f"{isopath}/"],
+                           check=True)
+
+            delete_generated(isopath)
+
+            write_bootconfig("boot/isolinux.cfg",
+                             os.path.join(isopath, "isolinux", "isolinux.cfg"),
+                             label=label, kickstart="edge.ks")
+
+            write_bootconfig("boot/grub.cfg",
+                             os.path.join(isopath, "EFI", "BOOT", "grub.cfg"),
+                             label=label)
+
+            shutil.copyfile("edge.ks", os.path.join(isopath, "edge.ks"))
+
+            make_iso(isopath, label, filename, tmp)
+
+
+if __name__ == "__main__":
+   main()
