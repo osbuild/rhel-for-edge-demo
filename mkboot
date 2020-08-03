@@ -96,8 +96,16 @@ def write_bootconfig(source, dest, **subst):
 
 
 def main():
-    bootiso = sys.argv[1]
-    filename = os.path.abspath("bootiso.iso")
+    parser = argparse.ArgumentParser(description="Modify boot iso")
+    parser.add_argument("iso", metavar="ISO", type=os.path.abspath,
+                        help="original ISO to modify")
+    parser.add_argument("--output", metavar="FILENAME", type=os.path.abspath,
+                        default="bootiso.iso",
+                        help="Name of the output file")
+    args = parser.parse_args(sys.argv[1:])
+
+    bootiso = args.iso
+    filename = args.output
 
     label = get_label(bootiso)
     print(f"Using {label}")
