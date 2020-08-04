@@ -90,7 +90,6 @@ def write_bootconfig(source, dest, **subst):
     with open(source, "r") as f:
         tpl = Template(f.read())
         data = tpl.substitute(**subst)
-    print(data)
     with open(dest, "w") as f:
         f.write(data)
 
