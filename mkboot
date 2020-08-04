@@ -102,13 +102,19 @@ def main():
     parser.add_argument("--output", metavar="FILENAME", type=os.path.abspath,
                         default="bootiso.iso",
                         help="Name of the output file")
+    parser.add_argument("--kickstart", metavar="FILENAME", type=os.path.abspath,
+                        default="edge.ks",
+                        help="Name of the kickstart file to embed")
     args = parser.parse_args(sys.argv[1:])
 
     bootiso = args.iso
     filename = args.output
+    ks_path = args.kickstart
+    ks_name = os.path.basename(ks_path)
 
     label = get_label(bootiso)
-    print(f"Using {label}")
+    print(f"Label:     {label}")
+    print(f"Kickstart: {ks_name} ({ks_path})")
 
     with tempfile.TemporaryDirectory(dir="/var/tmp") as tmp:
         mountpath = os.path.join(tmp, "mount")
@@ -124,13 +130,13 @@ def main():
 
             write_bootconfig("boot/isolinux.cfg",
                              os.path.join(isopath, "isolinux", "isolinux.cfg"),
-                             label=label, kickstart="edge.ks")
+                             label=label, kickstart=ks_name)
 
             write_bootconfig("boot/grub.cfg",
                              os.path.join(isopath, "EFI", "BOOT", "grub.cfg"),
-                             label=label)
+                             label=label, kickstart=ks_name)
 
-            shutil.copyfile("edge.ks", os.path.join(isopath, "edge.ks"))
+            shutil.copyfile(ks_path, os.path.join(isopath, ks_name))
 
             make_iso(isopath, label, filename, tmp)
 
