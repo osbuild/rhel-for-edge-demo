@@ -23,22 +23,27 @@ def mount_iso(iso, path):
         subprocess.run(["umount", path])
 
 
-def delete_generated(path):
+def delete_generated(path, verbose):
     for root, dirs, files in os.walk(path):
         for f in files:
             if f in ["TRANS.TBL", "boot.cat", "boot.catalog"]:
                 t = os.path.join(root, f)
-                print(f"unlink {t}")
+                if verbose:
+                    print(f"unlink {t}")
                 os.unlink(t)
 
 
-def make_iso(path, label, output, workdir):
+def make_iso(path, label, output, workdir, verbose):
     cmd = [
         "/usr/bin/xorrisofs"
     ]
 
+    if verbose:
+        cmd += ["-verbose"]
+    else:
+        cmd += ["-quiet"]
+
     cmd += [
-        "-verbose",
         "-V", label,
     ]
 
@@ -70,9 +75,16 @@ def make_iso(path, label, output, workdir):
         path
     ]
 
-    print(cmd)
+    if verbose:
+        print(cmd)
+        stdout = sys.stdout
+    else:
+        stdout = subprocess.DEVNULL
+
     subprocess.run(cmd,
                    cwd=workdir,
+                   stdout=stdout,
+                   stderr=stdout,
                    check=True)
 
 
@@ -104,6 +116,8 @@ def main():
     parser.add_argument("--kickstart", metavar="FILENAME", type=os.path.abspath,
                         default="edge.ks",
                         help="Name of the kickstart file to embed")
+    parser.add_argument("--verbose", default=False, action="store_true",
+                        help="Show more information")
     args = parser.parse_args(sys.argv[1:])
 
     bootiso = args.iso
@@ -125,7 +139,7 @@ def main():
             subprocess.run(["cp", "-a", f"{path}/.", f"{isopath}/"],
                            check=True)
 
-            delete_generated(isopath)
+            delete_generated(isopath, args.verbose)
 
             write_bootconfig("boot/isolinux.cfg",
                              os.path.join(isopath, "isolinux", "isolinux.cfg"),
@@ -137,7 +151,7 @@ def main():
 
             shutil.copyfile(ks_path, os.path.join(isopath, ks_name))
 
-            make_iso(isopath, label, filename, tmp)
+            make_iso(isopath, label, filename, tmp, args.verbose)
 
 
 if __name__ == "__main__":
