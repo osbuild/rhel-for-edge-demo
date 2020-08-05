@@ -161,7 +161,9 @@ def main():
                 dst = os.path.join(isopath, path, filename)
                 write_template(src, dst, **subst)
 
-            shutil.copyfile(ks_path, os.path.join(isopath, ks_name))
+            # write the kickstart
+            dst = os.path.join(isopath, ks_name)
+            write_template(ks_path, dst, **subst)
 
             make_iso(isopath, label, output, tmp, args.verbose)
 
