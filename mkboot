@@ -123,7 +123,7 @@ def main():
     args = parser.parse_args(sys.argv[1:])
 
     bootiso = args.iso
-    filename = args.output
+    output = args.output
     ks_path = args.kickstart
     ks_name = os.path.basename(ks_path)
     kargs = " ".join(args.kargs)
@@ -145,17 +145,25 @@ def main():
 
             delete_generated(isopath, args.verbose)
 
-            write_template("boot/isolinux.cfg",
-                           os.path.join(isopath, "isolinux", "isolinux.cfg"),
-                           label=label, kickstart=ks_name, kargs=kargs)
+            bootcfg = {
+                "isolinux.cfg" : "isolinux",
+                "grub.cfg": "EFI/BOOT",
+            }
 
-            write_template("boot/grub.cfg",
-                           os.path.join(isopath, "EFI", "BOOT", "grub.cfg"),
-                           label=label, kickstart=ks_name, kargs=kargs)
+            subst = {
+                "label": label,
+                "kickstart": ks_name,
+                "kargs": kargs
+            }
+
+            for filename, path in bootcfg.items():
+                src = os.path.join("boot", filename)
+                dst = os.path.join(isopath, path, filename)
+                write_template(src, dst, **subst)
 
             shutil.copyfile(ks_path, os.path.join(isopath, ks_name))
 
-            make_iso(isopath, label, filename, tmp, args.verbose)
+            make_iso(isopath, label, output, tmp, args.verbose)
 
 
 if __name__ == "__main__":
