@@ -98,7 +98,7 @@ def get_label(path):
     return label
 
 
-def write_bootconfig(source, dest, **subst):
+def write_template(source, dest, **subst):
     with open(source, "r") as f:
         tpl = Template(f.read())
         data = tpl.substitute(**subst)
@@ -145,13 +145,13 @@ def main():
 
             delete_generated(isopath, args.verbose)
 
-            write_bootconfig("boot/isolinux.cfg",
-                             os.path.join(isopath, "isolinux", "isolinux.cfg"),
-                             label=label, kickstart=ks_name, kargs=kargs)
+            write_template("boot/isolinux.cfg",
+                           os.path.join(isopath, "isolinux", "isolinux.cfg"),
+                           label=label, kickstart=ks_name, kargs=kargs)
 
-            write_bootconfig("boot/grub.cfg",
-                             os.path.join(isopath, "EFI", "BOOT", "grub.cfg"),
-                             label=label, kickstart=ks_name, kargs=kargs)
+            write_template("boot/grub.cfg",
+                           os.path.join(isopath, "EFI", "BOOT", "grub.cfg"),
+                           label=label, kickstart=ks_name, kargs=kargs)
 
             shutil.copyfile(ks_path, os.path.join(isopath, ks_name))
 
