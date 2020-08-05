@@ -118,16 +118,20 @@ def main():
                         help="Name of the kickstart file to embed")
     parser.add_argument("--verbose", default=False, action="store_true",
                         help="Show more information")
+    parser.add_argument("--kargs", metavar="ID", action="append", type=str, default=["quiet"],
+                        help="Additional kernel command line args")
     args = parser.parse_args(sys.argv[1:])
 
     bootiso = args.iso
     filename = args.output
     ks_path = args.kickstart
     ks_name = os.path.basename(ks_path)
+    kargs = " ".join(args.kargs)
 
     label = get_label(bootiso)
     print(f"Label:     {label}")
     print(f"Kickstart: {ks_name} ({ks_path})")
+    print(f"Kargs:     {kargs}")
 
     with tempfile.TemporaryDirectory(dir="/var/tmp") as tmp:
         mountpath = os.path.join(tmp, "mount")
@@ -143,11 +147,11 @@ def main():
 
             write_bootconfig("boot/isolinux.cfg",
                              os.path.join(isopath, "isolinux", "isolinux.cfg"),
-                             label=label, kickstart=ks_name)
+                             label=label, kickstart=ks_name, kargs=kargs)
 
             write_bootconfig("boot/grub.cfg",
                              os.path.join(isopath, "EFI", "BOOT", "grub.cfg"),
-                             label=label, kickstart=ks_name)
+                             label=label, kickstart=ks_name, kargs=kargs)
 
             shutil.copyfile(ks_path, os.path.join(isopath, ks_name))
 
