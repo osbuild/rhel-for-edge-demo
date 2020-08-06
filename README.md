@@ -183,3 +183,36 @@ the kickstart file into the boot iso:
 ```
 mkksiso edge.ks rhel-8.3-beta-1-x86_64-boot.iso boot.iso
 ```
+
+### Updates
+
+Updates are delivered in form of new commits. This provides one
+of the most important features of OSTree: atomic and safe updates.
+This means that an update of the system to a new commit will be
+deployed either fully or not at all, even if the update process
+gets interrupted. Additionally, the old state of the system, i.e.
+the deployment of the old commit, is kept around. In case the new
+update does not work as expected, it is easy to go back to the
+old commit.
+
+Creating a new a update commit, which can include new versions of
+packages or additional packages, is the same as creating a new
+"image" (in Image Builder terms), but with the commit id of the
+current deployment (or commit) as the *parent*. On a booted system
+the commit id be found `rpm-ostree status`.
+
+![screenshot](screenshots/updates.png)
+
+After the new commit is built, it needs to be served via http,
+very much like the initial commit above. Then the system can
+be updated via
+
+```
+rpm-ostree update
+```
+
+This will create a new deployment of the new commit. A reboot via
+`systemctl reboot`, is all that is necessary to boot into that
+new deployment.
+If something in the new deployment is not as it should be, the old
+deployment can be restored via `rpm-ostree rollback`.
