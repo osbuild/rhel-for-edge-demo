@@ -129,6 +129,7 @@ def main():
         res = subprocess.run(args, check=False)
     except KeyboardInterrupt:
         print("Aborted")
+        return -1
 
     return res.returncode
 
