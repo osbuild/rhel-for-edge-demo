@@ -66,9 +66,10 @@ def make_iso(path, label, output, workdir, verbose):
         "-isohybrid-gpt-basdat",
     ]
 
-    #cmd += [
-    #    "-isohybrid-mbr", "/usr/share/syslinux/isohdpfx.bin",
-    #]
+    if os.path.exists("/usr/share/syslinux/isohdpfx.bin"):
+        cmd += [
+            "-isohybrid-mbr", "/usr/share/syslinux/isohdpfx.bin",
+        ]
 
     cmd += [
         '-o', output,
