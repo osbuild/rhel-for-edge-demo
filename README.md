@@ -195,11 +195,11 @@ the deployment of the old commit, is kept around. In case the new
 update does not work as expected, it is easy to go back to the
 old commit.
 
-Creating a new a update commit, which can include new versions of
+Creating a new update commit, which can include new versions of
 packages or additional packages, is the same as creating a new
-"image" (in Image Builder terms), but with the commit id of the
+"image", in Image Builder terms, but with the commit id of the
 current deployment (or commit) as the *parent*. On a booted system
-the commit id be found `rpm-ostree status`.
+the commit id can be found via `rpm-ostree status`.
 
 ![screenshot](screenshots/updates.png)
 
@@ -211,7 +211,7 @@ be updated via
 rpm-ostree update
 ```
 
-This will create a new deployment of the new commit. A reboot via
+This will create a new deployment of the new commit. A reboot, via
 `systemctl reboot`, is all that is necessary to boot into that
 new deployment.
 If something in the new deployment is not as it should be, the old
