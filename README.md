@@ -140,7 +140,7 @@ podman run --rm -p 8000:80 edge-server
 
 ### Install to a disk via Anaconda
 
-The installer, anaconda, on the `boot.iso` installation medium is can
+The installer, anaconda, on the `boot.iso` installation medium can
 be used to install the commit. To configure the installer to use the
 newly build commit, a "kickstart" configuration [`edge.ks`](edge.ks),
 is used. It is setup for non-interactive, text-based installation.
