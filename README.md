@@ -6,20 +6,20 @@ commit and how to install those to a disk or an image.
 
 ## Requirements
 
-Image Builder is available via [RHEL 8.3 Beta](https://access.redhat.com/products/red-hat-enterprise-linux/beta).
+Image Builder is available via [RHEL 8.3](https://access.redhat.com/pilot-documentation/red_hat_enterprise_linux/8).
 The *KVM Guest Image* is used to install Image Builder and build a
 RHEL for Edge commit.
 The *Boot ISO* is then used to install that commit.
 
 Name            | Filename
-----------------|---------------------------------
-Boot ISO        | rhel-8.3-beta-1-x86_64-boot.iso
-KVM Guest Image | rhel-8.3-beta-1-x86_64-kvm.qcow2
+----------------|-------------------------
+Boot ISO        | rhel-8.3-x86_64-boot.iso
+KVM Guest Image | rhel-8.3-x86_64-kvm.qcow2
 
 
 ## Install Image Builder
 
-### Run RHEL beta via VM script
+### Run RHEL inside a virtual machine
 
 A small helper script is used to start the RHEL 8.3 Guest Image. It uses
 cloud init to provision a root user (password `r`). The script also enables
