@@ -124,14 +124,8 @@ rpm-ostree db list rhel/8/x86_64/edge --repo=repo
 ### Setup a webserver
 
 In order to fetch the commit from the (generic) installer, it needs to be
-served via HTTP. This can be done either via a small Go binary (`main.go`),
-that can be run with:
-
-```
-go run main.go
-```
-
-Or a container can be prepared to serve the commit.
+served via HTTP. This can be done via a container that contains the OSTree
+commit as well as a http server to serve it.
 
 ```
 podman build -t edge-server --build-arg commit=<uuid>-commit.tar .
