@@ -45,6 +45,17 @@ subscription-manager attach
 
 ### Install Image Builder
 
+Image Builder consists of different components: `osbuild-composer` is the
+service that sits between the low level `osbuild` tool and various front
+ends, such as `cockpit-composer` (web) and `composer-cli` (command line).
+It provides an API that is used front-ends, does job queue management, and
+internally calls out to one or more worker services which in turn then use
+`osbuild` to actually assemble the operating system artifacts such as
+virtual machine images or in the case of RHEL for Edge OSTree commits.
+
+All necessary components are now included in RHEL 8.3, and can easily be
+installed via:
+
 ```
 yum install osbuild-composer cockpit-composer
 ```
