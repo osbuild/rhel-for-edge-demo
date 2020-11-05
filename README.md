@@ -22,8 +22,9 @@ KVM Guest Image | rhel-8.3-x86_64-kvm.qcow2
 ### Run RHEL inside a virtual machine
 
 A small helper script is used to start the RHEL 8.3 Guest Image. It uses
-cloud init to provision a root user (password `r`). The script also enables
-port forwarding for the ssh and web console ports (`22` → `2222` (host) and
+[cloud-init](https://cloudinit.readthedocs.io/en/latest/) to provision a
+`root` user (password `r`). The script also enables port forwarding for
+the ssh and web console ports (`22` → `2222` (host) and
 `9090` → `9091`).
 
 ```
