@@ -67,9 +67,9 @@ commits / images. The UI flow is as follows:
 
  1. Activate the Image Builder service.
  2. Create a Blueprint ![screenshot](screenshots/blueprint.png)
- 3. Add packages (optionally) ![screenshot](screenshots/packages.png)
+ 3. Customization: add packages ![screenshot](screenshots/packages.png)
  4. Create the commit ![screenshot](screenshots/create.png)
- 5. **Wait**
+ 5. Wait for the build to finish
  6. Tarball with the commit is ready to download ![screenshot](screenshots/download.png)
 
 ### Build via the command line
