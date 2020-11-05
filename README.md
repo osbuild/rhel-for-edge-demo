@@ -157,7 +157,7 @@ qemu-system-x86_64 \
   -device virtio-net-pci,netdev=n0 \
   -netdev user,id=n0,net=10.0.2.0/24 \
   -drive file=disk.qcow2 \
-  -cdrom rhel-8.3-beta-1-x86_64-boot.iso
+  -cdrom rhel-8.3-x86_64-boot.iso
 ```
 
 To use the prepared kicksstart file, instead of the default one of
