@@ -2,7 +2,7 @@
 
 This demonstrates the use of [Image Builder](https://www.osbuild.org/) to
 create a (custom) RHEL for Edge [OSTree](https://ostree.readthedocs.io/en/latest/)
-commit and how to install those to a disk or an image.
+commit and how to install those to a disk or a virtual machine image.
 
 ## Requirements
 
