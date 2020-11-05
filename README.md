@@ -28,7 +28,7 @@ the ssh and web console ports (`22` → `2222` (host) and
 `9090` → `9091`).
 
 ```
-vm --persist rhel-8.3-beta-1-x86_64-kvm.qcow2
+vm --persist rhel-8.3-x86_64-kvm.qcow2
 ```
 
 ### Register the system
@@ -197,7 +197,7 @@ command line, the `mkksiso` (`lorax` package) can be used to inject
 the kickstart file into the boot iso:
 
 ```
-mkksiso edge.ks rhel-8.3-beta-1-x86_64-boot.iso boot.iso
+mkksiso edge.ks rhel-8.3-x86_64-boot.iso boot.iso
 ```
 
 ### Updates
