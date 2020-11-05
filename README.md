@@ -60,9 +60,20 @@ installed via:
 yum install osbuild-composer cockpit-composer
 ```
 
+The `osbuild-compser` service needs to be explicitly enabled:
+
+```
+sudo systemctl enable --now osbuild-composer.socket
+```
+
+NB: Technically only the socket, i.e. the API endpoint is enabled here, not
+the service itself. The services will be started on-demand as soon as the
+first client connects.
+
 ### Enable web console
 The Image Builder front end is a plugin to the web console (*cockpit*),
 which needs to be enabled.
+
 ```
 systemctl enable --now cockpit.socket
 ```
@@ -77,12 +88,11 @@ e.g. "RHEL for Edge commit". Internally there is a queue that will
 distribute compose requests to workers, which in turn are building the
 commits / images. The UI flow is as follows:
 
- 1. Activate the Image Builder service.
- 2. Create a Blueprint ![screenshot](screenshots/blueprint.png)
- 3. Customization: add packages ![screenshot](screenshots/packages.png)
- 4. Create the commit ![screenshot](screenshots/create.png)
- 5. Wait for the build to finish
- 6. Tarball with the commit is ready to download ![screenshot](screenshots/download.png)
+ 1. Create a Blueprint ![screenshot](screenshots/blueprint.png)
+ 2. Customization: add packages ![screenshot](screenshots/packages.png)
+ 3. Create the commit ![screenshot](screenshots/create.png)
+ 4. Wait for the build to finish
+ 5. Tarball with the commit is ready to download ![screenshot](screenshots/download.png)
 
 ### Build via the command line
 
