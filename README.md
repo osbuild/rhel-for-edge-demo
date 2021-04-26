@@ -290,6 +290,6 @@ the millions, we need to think differently about how we interact with
 the fleet. Also as connectivity inceases with systems and devices, the 
 importance of keeping everything updated while minimizing downtime and 
 application disruptions also become critical. The example kickstarts 
-demonstrate how to configure nodes to automatically stay currect on 
+demonstrate how to configure nodes to automatically stay correct on 
 available updates. These concepts can be built upon and adapted for 
 many other use cases. 
