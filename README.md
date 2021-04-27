@@ -2,32 +2,33 @@
 
 This demonstrates the use of [Image Builder](https://www.osbuild.org/) to
 create a (custom) RHEL for Edge [OSTree](https://ostree.readthedocs.io/en/latest/)
-commit and how to install those to a disk or an image.
+commit and how to install those to a disk or a virtual machine image.
 
 ## Requirements
 
-Image Builder is available via [RHEL 8.3 Beta](https://access.redhat.com/products/red-hat-enterprise-linux/beta).
+Image Builder is available via [RHEL 8.3](https://access.redhat.com/pilot-documentation/red_hat_enterprise_linux/8).
 The *KVM Guest Image* is used to install Image Builder and build a
 RHEL for Edge commit.
 The *Boot ISO* is then used to install that commit.
 
 Name            | Filename
-----------------|---------------------------------
-Boot ISO        | rhel-8.3-beta-1-x86_64-boot.iso
-KVM Guest Image | rhel-8.3-beta-1-x86_64-kvm.qcow2
+----------------|-------------------------
+Boot ISO        | rhel-8.3-x86_64-boot.iso
+KVM Guest Image | rhel-8.3-x86_64-kvm.qcow2
 
 
 ## Install Image Builder
 
-### Run RHEL beta via VM script
+### Run RHEL inside a virtual machine
 
 A small helper script is used to start the RHEL 8.3 Guest Image. It uses
-cloud init to provision a root user (password `r`). The script also enables
-port forwarding for the ssh and web console ports (`22` → `2222` (host) and
+[cloud-init](https://cloudinit.readthedocs.io/en/latest/) to provision a
+`root` user (password `r`). The script also enables port forwarding for
+the ssh and web console ports (`22` → `2222` (host) and
 `9090` → `9091`).
 
 ```
-vm --persist rhel-8.3-beta-1-x86_64-kvm.qcow2
+vm --persist rhel-8.3-x86_64-kvm.qcow2
 ```
 
 ### Register the system
@@ -44,13 +45,35 @@ subscription-manager attach
 
 ### Install Image Builder
 
+Image Builder consists of different components: `osbuild-composer` is the
+service that sits between the low level `osbuild` tool and various front
+ends, such as `cockpit-composer` (web) and `composer-cli` (command line).
+It provides an API that is used front-ends, does job queue management, and
+internally calls out to one or more worker services which in turn then use
+`osbuild` to actually assemble the operating system artifacts such as
+virtual machine images or in the case of RHEL for Edge OSTree commits.
+
+All necessary components are now included in RHEL 8.3, and can easily be
+installed via:
+
 ```
 yum install osbuild-composer cockpit-composer
 ```
 
+The `osbuild-compser` service needs to be explicitly enabled:
+
+```
+sudo systemctl enable --now osbuild-composer.socket
+```
+
+NB: Technically only the socket, i.e. the API endpoint is enabled here, not
+the service itself. The services will be started on-demand as soon as the
+first client connects.
+
 ### Enable web console
 The Image Builder front end is a plugin to the web console (*cockpit*),
 which needs to be enabled.
+
 ```
 systemctl enable --now cockpit.socket
 ```
@@ -65,12 +88,11 @@ e.g. "RHEL for Edge commit". Internally there is a queue that will
 distribute compose requests to workers, which in turn are building the
 commits / images. The UI flow is as follows:
 
- 1. Activate the Image Builder service.
- 2. Create a Blueprint ![screenshot](screenshots/blueprint.png)
- 3. Add packages (optionally) ![screenshot](screenshots/packages.png)
- 4. Create the commit ![screenshot](screenshots/create.png)
- 5. **Wait**
- 6. Tarball with the commit is ready to download ![screenshot](screenshots/download.png)
+ 1. Create a Blueprint ![screenshot](screenshots/blueprint.png)
+ 2. Customization: add packages ![screenshot](screenshots/packages.png)
+ 3. Create the commit ![screenshot](screenshots/create.png)
+ 4. Wait for the build to finish
+ 5. Tarball with the commit is ready to download ![screenshot](screenshots/download.png)
 
 ### Build via the command line
 
@@ -124,14 +146,8 @@ rpm-ostree db list rhel/8/x86_64/edge --repo=repo
 ### Setup a webserver
 
 In order to fetch the commit from the (generic) installer, it needs to be
-served via HTTP. This can be done either via a small Go binary (`main.go`),
-that can be run with:
-
-```
-go run main.go
-```
-
-Or a container can be prepared to serve the commit.
+served via HTTP. This can be done via a container that contains the OSTree
+commit as well as a http server to serve it.
 
 ```
 podman build -t edge-server --build-arg commit=<uuid>-commit.tar .
@@ -163,7 +179,7 @@ qemu-system-x86_64 \
   -device virtio-net-pci,netdev=n0 \
   -netdev user,id=n0,net=10.0.2.0/24 \
   -drive file=disk.qcow2 \
-  -cdrom rhel-8.3-beta-1-x86_64-boot.iso
+  -cdrom rhel-8.3-x86_64-boot.iso
 ```
 
 To use the prepared kicksstart file, instead of the default one of
@@ -181,7 +197,7 @@ command line, the `mkksiso` (`lorax` package) can be used to inject
 the kickstart file into the boot iso:
 
 ```
-mkksiso edge.ks rhel-8.3-beta-1-x86_64-boot.iso boot.iso
+mkksiso edge.ks rhel-8.3-x86_64-boot.iso boot.iso
 ```
 
 ### Updates
@@ -287,9 +303,9 @@ might follow a weekly maintenance window on Sunday nights
 ## Final Thoughts
 When nodes are deployed in numbers ranging from 10s of thousands into 
 the millions, we need to think differently about how we interact with 
-the fleet. Also as connectivity inceases with systems and devices, the 
+the fleet. Also as connectivity increases with systems and devices, the
 importance of keeping everything updated while minimizing downtime and 
 application disruptions also become critical. The example kickstarts 
-demonstrate how to configure nodes to automatically stay correct on 
+demonstrate how to configure nodes to automatically stay current on
 available updates. These concepts can be built upon and adapted for 
 many other use cases. 
