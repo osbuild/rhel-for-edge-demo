@@ -39,39 +39,10 @@ OnCalendar=*-*-* 01:30:00
 WantedBy=multi-user.target
 EOF
 
-systemctl enable rpm-ostreed-automatic.timer applyupdate.timer
+systemctl enable podman-auto-update.timer rpm-ostreed-automatic.timer applyupdate.timer
 %end
 
 %post
-#Add a podman autoupdate timer & service
-
-cat > /etc/systemd/system/podman-auto-update.service << EOF
-[Unit]
-Description=Podman auto-update service
-Documentation=man:podman-auto-update(1)
-Wants=network.target
-After=network-online.target
-
-[Service]
-ExecStart=/usr/bin/podman auto-update
-
-[Install]
-WantedBy=multi-user.target default.target
-EOF
-
-cat > /etc/systemd/system/podman-auto-update.timer << EOF
-[Unit]
-Description=Podman auto-update timer
-
-[Timer]
-OnCalendar=daily
-Persistent=true
-RandomizedDelaySec=7200
-
-[Install]
-WantedBy=timers.target
-EOF
-
 #create a unit file to run our example workload 
 cat > /etc/systemd/system/container-boinc.service <<EOF
 # container-boinc.service
@@ -104,5 +75,5 @@ EOF
 #create host mount points
 mkdir -p /opt/appdata/boinc/slots /opt/appdata/boinc/locale
 
-systemctl enable podman-auto-update.timer container-boinc.service
+systemctl enable container-boinc.service
 %end

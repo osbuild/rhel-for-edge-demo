@@ -3,6 +3,7 @@ users:
   - default
   - name: root
     gecos: RR
+    ssh_pwauth: True
 chpasswd:
   list: |
     root:r
