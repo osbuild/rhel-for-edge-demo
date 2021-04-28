@@ -293,7 +293,7 @@ packages or additional packages, is the same as creating a new
 current deployment (or commit) as the *parent*. On a booted system
 the commit id can be found via `rpm-ostree status` and can optionally be passed to Image Builder via the Web UI or CLI. An easier option is to supply the `Repository URL` and let Image Builder fetch the commit id on your behalf.  
 
-![screenshot](screenshots/updates.png)
+![screenshot](screenshots/updates2.png)
 
 After the new commit is built, it needs to be served via http,
 very much like the initial commit above. Then the system can
