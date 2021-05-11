@@ -31,77 +31,13 @@ The latest version of Image Builder can create several types of RHEL for Edge ar
 
 ## Requirements
 
-Install Image Builder on the latest release of [RHEL](https://access.redhat.com/pilot-documentation/red_hat_enterprise_linux/8).
-8.3 is the minimal required version, but this demo will include features from
-later releases. The *KVM Guest Image* is used to install Image Builder and build a
-RHEL for Edge commit. The *Boot ISO* is then used to install that commit. 
+Install Vagrant and VirtualBox.
 
-Name            | Filename
-----------------|-------------------------
-Boot ISO        | rhel-8.x-x86_64-boot.iso
-KVM Guest Image | rhel-8.x-x86_64-kvm.qcow2
+## Spin the RHEL 8 VM
 
-
-## Install Image Builder
-
-### Run RHEL inside a virtual machine
-
-A small helper script is used to start the RHEL 8.x Guest Image. It uses
-[cloud-init](https://cloudinit.readthedocs.io/en/latest/) to provision a
-`root` user (password `r`). The script also enables port forwarding for
-the ssh and web console ports (`22` → `2222` (host) and
-`9090` → `9091`).
-
-```
-vm --persist rhel-8.x-x86_64-kvm.qcow2
-```
-
-### Register the system
-
-To be able to install packages the VM must be registered via:
-
-```
-subscription-manager register --username <redhat_login_username> --password <redhat_login_password>
-subscription-manager role --set="Red Hat Enterprise Linux Server"
-subscription-manager service-level --set="Self-Support"
-subscription-manager usage --set="Development/Test"
-subscription-manager attach
-```
-
-### Install Image Builder
-
-Image Builder consists of different components: `osbuild-composer` is the
-service that sits between the low level `osbuild` tool and various front
-ends, such as `cockpit-composer` (web) and `composer-cli` (command line).
-It provides an API that is used front-ends, does job queue management, and
-internally calls out to one or more worker services which in turn then use
-`osbuild` to actually assemble the operating system artifacts such as
-virtual machine images or in the case of RHEL for Edge OSTree commits.
-
-All necessary components are now included in RHEL 8.3+, and can easily be
-installed via:
-
-```
-yum install -y osbuild-composer cockpit-composer
-```
-
-The `osbuild-compser` service needs to be explicitly enabled:
-
-```
-sudo systemctl enable --now osbuild-composer.socket
-```
-
-NB: Technically only the socket, i.e. the API endpoint is enabled here, not
-the service itself. The services will be started on-demand as soon as the
-first client connects.
-
-### Enable web console
-The Image Builder front end is a plugin to the web console (*cockpit*),
-which needs to be enabled.
-
-```
-systemctl enable --now cockpit.socket
-```
+1. `cp .env.example .env`
+2. Populate the values in the .env file
+3. `vagrant up`
 
 ## Build a RHEL for Edge container
 
