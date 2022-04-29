@@ -1,0 +1,15 @@
+name = "simplified_installer"
+description = "A rhel-edge simplified-installer image"
+version = "0.0.5"
+packages = []
+modules = []
+groups = []
+distro = ""
+
+[customizations]
+installation_device = "/dev/vda"
+
+[customizations.fdo]
+manufacturing_server_url = "http://10.0.0.2:8080"
+diun_pub_key_insecure = "true"
+
