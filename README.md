@@ -175,15 +175,15 @@ rpm-ostree db list rhel/8/x86_64/edge --repo=repo
 ### Run the Container to serve the Image
 
 In order to fetch the commit from the (generic) installer, it needs to be
-served via HTTP. The container that was just created runs `httpd` and will serve the OSTree commit.
+served via HTTP. The container that was just created runs nginx and will serve the OSTree commit.
 
 Import & tag the container
 ```
-$> skopeo copy oci-archive:<UUID>-rhel84-container.tar containers-storage:localhost/rfe-mirror:latest
+$> skopeo copy oci-archive:<UUID>-container.tar containers-storage:localhost/rfe-mirror:latest
 ```
 Run the container
 ```
-$> podman run --rm -p 8000:80 -v ./edge.ks:/var/www/html/edge.ks:z edge-server
+$> podman run --rm -p 8000:8080 -v ./edge.ks:/var/www/html/edge.ks:z edge-server
 ```
 
 The repo will now be available at http://10.0.2.2:8000/repo and the supplied kickstart at http://10.0.2.2:8000/edge.ks
@@ -274,6 +274,57 @@ The same workflow is available in the web UI as well:
 
 </details>
 
+### Create an installer image for use with FIDO Device Onboarding (FDO) - New w/ 8.6 & 9.0 (Tech Preview)
+<details>
+  <summary>Click to create an Simplified Installer Image w/ FDO</summary>
+  
+  The Simplified Installer uses coreos-install to write the OStree commit straight to disk. This means there's no need to embed a kickstart config, and any customization can be applied via FDO, or any external management tool. This is a perfect way to flash systems, ship them, have them onboard when they're deployed in the field, and then pass any sensative data over the secure FDO channel. coreos-install can deploy from an ISO, USB, or via a network install. Please note that only UEFI firmware is supported.
+  
+
+#### Build via the command line
+
+A blueprint with 1) an empty packages section 2) a few additional options is required to create a simplified-installer image. An example TOML file is included in this repo, e.g. simplified-installer.toml (feel free to adjust this as needed for your environment):
+
+```
+$> composer-cli blueprints push simplified-installer.toml
+```
+
+Next, start a `edge-simplified-installer` compose for the blueprint created in the previous step. Passing the --url to the OSTree repository of the commit to embed in the image.
+```
+$> composer-cli compose start-ostree simplified-installer edge-simplified-installer --url http://10.0.2.2:8000/repo/ 
+Compose 96fc0e4e-ad76-4cbd-b875-91e69a1d7efc added to the queue
+```
+
+When the compose is complete download the ISO
+
+```
+$> composer-cli compose image <uuid>
+<uuid>-simplified-installer.iso: 841M MB
+```
+
+The installer image can be written to optical or flash media using standard methods. To use with a network install (PXE, iPXE, or http boot) simply copy the contents of the image to a http or tftp endpoint and edit /EFI/Boot/grub.cfg for your environment. 
+
+  It may be necessary to adjust the path to the vmlinuz & initrd.img as well as configure coreos.inst.image_url= as illustrated below.
+
+Original:
+```
+  linux /images/pxeboot/vmlinuz rd.neednet=1 coreos.inst.crypt_root=1 coreos.inst.isoroot=RHEL-9-0-0-BaseOS-x86_64 coreos.inst.install_dev=/dev/vda coreos.inst.image_file=/run/media/iso/disk.img.xz coreos.inst.insecure fdo.manufacturing_server_url=http://10.0.0.2:8080 fdo.diun_pub_key_insecure=true quiet
+        initrd /images/pxeboot/initrd.img
+```
+Edited:
+```
+  linux /si/images/pxeboot/vmlinuz rd.neednet=1 coreos.inst.crypt_root=1 coreos.inst.install_dev=/dev/vda coreos.inst.image_url=http://10.0.0.2/si/disk.img.xz coreos.inst.insecure fdo.manufacturing_server_url=http://10.0.0.2:8080 fdo.diun_pub_key_insecure=true console=tty0 console=ttyS0,115200 quiet
+        initrd /si/images/pxeboot/initrd.img
+```
+
+Before installing and provisioning the system, we need to configure FDO. Production environment will likely want to spread out the different services in a proper micro-service fashion. For the scope of this example we'll be using the FDO all-in-one deployment. Run the following commands on the image builder system:
+```
+$> yum -y install fdo-admin-cli && systemctl enable --now fdo-aio
+```
+This will generate all the necessary configs and keys needed for FDO to work. This repo provides an alternate serviceinfo_api_server.yml file as an example to recreate the same demo as edge2.ks. Copy this file to /etc/fdo/aio/configs/, copy & extract device0.tgz under /etc/, and run systemctl restart fdo-aio to use this example. This assumes that you are provisioning a VM using UEFI w/ a TPM configured. Adjust /dev/vda as necessary to use with a bare metal environment. 
+  
+  
+</details>
 
 
 ## Create Image Updates
