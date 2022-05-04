@@ -1,0 +1,60 @@
+---
+service_info:
+  initial_user: 
+    username: core
+    sshkeys:
+    - "ssh-rsa AAAA...."
+  files:
+  - path: /etc/rpm-ostreed.conf
+    permissions: 644
+    source_path: /etc/device0/cfg/etc/rpm-ostreed.conf 
+  - path: /etc/systemd/system/applyupdate.service
+    permissions: 644
+    source_path: /etc/device0/cfg/etc/systemd/system/applyupdate.service
+  - path: /etc/systemd/system/applyupdate.timer
+    permissions: 644
+    source_path: /etc/device0/cfg/etc/systemd/system/applyupdate.timer
+  - path: /etc/systemd/system/container-boinc.service
+    permissions: 644
+    source_path: /etc/device0/cfg/etc/systemd/system/container-boinc.service
+  commands: 
+  - command: mkdir
+    args:
+    - "/var/log/journal"
+  - command: mkdir
+    args:
+    - "-p" 
+    - "/opt/appdata/boinc/slots"
+  - command: mkdir
+    args:
+    - "-p" 
+    - "/opt/appdata/boinc/locale"
+  - command: systemctl
+    args:
+    - daemon-reload
+  - command: systemctl
+    args:
+    - enable 
+    - --now
+    - rpm-ostreed-automatic.timer 
+    - applyupdate.timer 
+    - podman-auto-update.timer 
+    - container-boinc.service
+  - command: rpm-ostree
+    args:
+    - kargs
+    - --append=console=tty0
+    - --append=console=ttyS0,115200
+  diskencryption_clevis: 
+  - disk_label: /dev/vda4
+    binding:
+      pin: tpm2
+      config: "{}"
+    reencrypt: true
+  additional_serviceinfo: ~
+bind: "0.0.0.0:8083"
+service_info_auth_token: 0A7sPGzOYCulrJZ/Yd3v5YYVdTBo4J/5AtIvvxhiLIY=
+admin_auth_token: AvgDbGgBDNtL7x52S7iakFwDxVXsPSxG4GgVQFiUgvk=
+device_specific_store_driver:
+  Directory:
+    path: /etc/fdo/aio/stores/serviceinfo_api_devices
