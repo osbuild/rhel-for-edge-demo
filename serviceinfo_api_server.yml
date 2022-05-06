@@ -53,8 +53,8 @@ service_info:
     reencrypt: true
   additional_serviceinfo: ~
 bind: "0.0.0.0:8083"
-service_info_auth_token: 0A7sPGzOYCulrJZ/Yd3v5YYVdTBo4J/5AtIvvxhiLIY=
-admin_auth_token: AvgDbGgBDNtL7x52S7iakFwDxVXsPSxG4GgVQFiUgvk=
+service_info_auth_token: [REPLACE_WITH_TOKEN]
+admin_auth_token: [REPLACE_WITH_TOKEN]
 device_specific_store_driver:
   Directory:
     path: /etc/fdo/aio/stores/serviceinfo_api_devices
