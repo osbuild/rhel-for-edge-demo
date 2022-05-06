@@ -321,7 +321,7 @@ Before installing and provisioning the system, we need to configure FDO. Product
 ```
 $> yum -y install fdo-admin-cli && systemctl enable --now fdo-aio
 ```
-This will generate all the necessary configs and keys needed for FDO to work. This repo provides an alternate serviceinfo_api_server.yml file as an example to recreate the same demo as edge2.ks. Copy this file to /etc/fdo/aio/configs/, copy & extract device0.tgz under /etc/, and run systemctl restart fdo-aio to use this example. This assumes that you are provisioning a VM using UEFI w/ a TPM configured. Adjust /dev/vda as necessary to use with a bare metal environment. 
+This will generate all the necessary configs and keys needed for FDO to work. This repo provides an alternate serviceinfo_api_server.yml file as an example to recreate the same demo as edge2.ks. To use file simply add the desired ssh key and add replace the service_info_auth_token & admin_auth_token from the serviceinfo_api_server.yml file that was generated on your system. Next, copy this file to /etc/fdo/aio/configs/, copy & extract device0.tgz under /etc/, and run `systemctl restart fdo-aio` for the changes to take effect. This assumes that you are provisioning a VM using UEFI w/ a TPM configured. Adjust /dev/vda as necessary to use with other environments. 
   
   
 </details>
