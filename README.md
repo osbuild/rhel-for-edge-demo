@@ -135,7 +135,7 @@ From this a compose is created for the previously created blueprint
 UUID if the compose can later be used to obtain the artifact.
 
 ```
-$> composer-cli compose start-ostree Edge rhel-edge-container "" ""
+$> composer-cli compose start-ostree Edge rhel-edge-container
 Compose <uuid> added to the queue
 ```
 
@@ -183,7 +183,7 @@ $> skopeo copy oci-archive:<UUID>-container.tar containers-storage:localhost/rfe
 ```
 Run the container
 ```
-$> podman run --rm -p 8000:8080 -v ./edge.ks:/var/www/html/edge.ks:z edge-server
+$> podman run --rm -p 8000:8080 -v ./edge.ks:/var/www/html/edge.ks:z rfe-mirror
 ```
 
 The repo will now be available at http://10.0.2.2:8000/repo and the supplied kickstart at http://10.0.2.2:8000/edge.ks
