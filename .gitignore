@@ -7,3 +7,6 @@ compose.json
 # images and isos
 *.qcow2
 *.iso
+
+.env
+.vagrant/
