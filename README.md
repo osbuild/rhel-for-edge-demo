@@ -339,7 +339,7 @@ One other thing worth noting is Ignition is capable of fetching remote configs. 
 
 #### Editing and rendering Ignition config
 
-These steps can be run from the system that has Image Builder installed on it. Begin by editing the [`stub.bu`](ign/stub.bu)stub.bu config in this repo. Add your ssh key and web server that is hosting the remote configuration that we will render. The password hash continues to use the same demo password of "edge" (please change this before using in production). If you prefer to use a complete config instead of the stub, replace [`full.bu`](ign/full.bu)full.bu in place of stub.bu in the steps below.
+These steps can be run from the system that has Image Builder installed on it. Begin by editing the [`stub.bu`](ign/stub.bu)stub.bu config in this repo. Add your ssh key and web server that is hosting the remote configuration that we will render. The password hash continues to use the same demo password of "edge" (please change this before using in production). If you prefer to use a complete config instead of the stub, replace [`full.bu`](ign/full.bu) in place of stub.bu in the steps below.
 
 Once the file has been updated, we'll use butane to render the json config for Ignition.
 
