@@ -36,6 +36,8 @@ Install Image Builder on the latest release of [RHEL](https://developers.redhat.
 later releases. We recommend using RHEL 9.2 or later. The *KVM Guest Image* is used to install Image Builder and build a
 RHEL for Edge commit. The *Boot ISO* is then used to install that commit. 
 
+If you already have a RHEL system installed and registered please skip to [this section](#build-a-rhel-for-edge-container)
+
 Name            | Filename
 ----------------|-------------------------
 Boot ISO        | rhel-baseos-9.x-x86_64-boot.iso
@@ -105,7 +107,7 @@ systemctl enable --now cockpit.socket
 
 ## Build a RHEL for Edge container
 
-Navigate to the web console via a browser on the host. URL: http://localhost:9091
+Navigate to the web console via a browser on the host. URL: http://localhost:9091 (if you did not follow the automation scripts above, port 9090 will be the default)
 There, *Image Builder* is found under *Apps* in the right menu.
 Images, or in our case, commits, are generated from so called *Blueprints*,
 which are customizations that are applied to existing *Image Types*,
@@ -223,7 +225,7 @@ qemu-system-x86_64 \
 
 To use the prepared kickstart file, instead of the default one of
 the `boot.iso`, an additional kernel parameter is needed (hit `TAB`
-on the `Install Red Hat Enterprise Linux 8.3` entry):
+on the `Install Red Hat Enterprise Linux` entry):
 
 ```
 inst.ks=http://10.0.2.2:8000/edge.ks
@@ -322,7 +324,7 @@ Before installing and provisioning the system, we need to configure FDO. Product
 ```
 $> yum -y install fdo-admin-cli && systemctl enable --now fdo-aio
 ```
-This will generate all the necessary configs and keys needed for FDO to work. This repo provides an alternate [`serviceinfo_api_server.yml`](fdo/serviceinfo_api_server.yml) file as an example to recreate the same demo as [`edge2.ks`](ks/edge2.ks). To use file simply add the desired ssh key and add replace the service_info_auth_token & admin_auth_token from the [`serviceinfo_api_server.yml`](fdo/serviceinfo_api_server.yml) file that was generated on your system. Next, copy this file to /etc/fdo/aio/configs/, copy & extract [`device0.tgz`](fdo/device0.tgz) under /etc/, and run `systemctl restart fdo-aio` for the changes to take effect. This assumes that you are provisioning a VM using UEFI w/ a TPM configured. Adjust /dev/vda as necessary to use with other environments. 
+This will generate all the necessary configs and keys needed for FDO to work. This repo provides an alternate [`serviceinfo_api_server.yml`](fdo/serviceinfo_api_server.yml) file as an example to recreate the same demo as [`edge2.ks`](ks/edge2.ks). To use file simply add the desired ssh key and add replace the service_info_auth_token & admin_auth_token from the [`serviceinfo_api_server.yml`](fdo/serviceinfo_api_server.yml) file that was generated on your system. Next, copy this file to /etc/fdo/aio/configs/, copy & extract [`device0.tgz`](fdo/device0.tgz) under /etc/, and run `systemctl restart fdo-aio` for the changes to take effect. This assumes that you are provisioning a VM using UEFI w/ a TPM configured. Adjust /dev/vda as necessary to use with other environments.
   
   
 </details>
@@ -331,9 +333,9 @@ This will generate all the necessary configs and keys needed for FDO to work. Th
 <details>
   <summary>Click to learn more about using Ignition to provide configuration </summary>
 
-Ignition is very similar to Cloud-Init and well supported with both rpm-ostree and the coreos-installer, both of which are used when a Simplified Installer image is created. We've converted the [`edge2.ks`](ks/edge2.ks) example into Ingition to serve as an example. Ingnition is intended to be machine generated & machine read. Our example will start with human readable/editable configs and converted using butane to render them for final use with the image. To embed the config in Image Builder's blueprint we will encode the file using base64. It may seem convoluded to go through this process, but it's super simple to automate and will make long-term maintenance easier for developers/admins. 
+Ignition is very similar to Cloud-Init and well supported with both rpm-ostree and the coreos-installer, both of which are used when a Simplified Installer image is created. We've converted the [`edge2.ks`](ks/edge2.ks) example into Ingition to serve as an example. Ingnition is intended to be machine generated & machine read. Our example will start with human readable/editable configs and converted using butane to render them for final use with the image. To embed the config in Image Builder's blueprint we will encode the file using base64. It may seem convoluded to go through this process, but it's super simple to automate and will make long-term maintenance easier for developers/admins.
 
-One other thing worth noting is Ignition is capable of fetching remote configs. This is incredibly powerful if you control DNS and want systems in different zones to have different configs. It's also really helpful for iterating on the config as changes to the file won't require building a new installation image to embed the changes. We recommend embedding a stub config in your image that configures a user & ssh key and fetching the remaining options from a web server for doing development. While this same approach is perfectly fine for some production environments, others will benefit from embedding the complete config in the image. We are also providing a complete example config to help show to embed the complete config without a remote fetch. 
+One other thing worth noting is Ignition is capable of fetching remote configs. This is incredibly powerful if you control DNS and want systems in different zones to have different configs. It's also really helpful for iterating on the config as changes to the file won't require building a new installation image to embed the changes. We recommend embedding a stub config in your image that configures a user & ssh key and fetching the remaining options from a web server for doing development. While this same approach is perfectly fine for some production environments, others will benefit from embedding the complete config in the image. We are also providing a complete example config to help show to embed the complete config without a remote fetch.
 
 #### Editing and rendering Ignition config
 
@@ -436,7 +438,7 @@ traditional data centers. Podman natively supports systemd as a
 manager and this results in one of the lightest weight solutions 
 for running containers. This demo originally showed an example boinc container 
 systemd unit file generated by `podman generate systemd`. systemd 
-will ensure the `container-boinc.service` is running at startup 
+will ensure the `boinc.service` is running at startup 
 and in the case that it fails at runtime, automatically restarted 
 via `Restart=always`. With the release of RHEL 9.2, Podman now include support
 for Quadlet. We have updated the examples in the repo to use Quadlet rather than
