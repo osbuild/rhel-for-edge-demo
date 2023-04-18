@@ -124,7 +124,7 @@ commits / images. The UI flow is as follows:
 Commits can also build from the command line, via the help of
 the `composer-cli` tool (`yum install composer-cli`).
 
-A new blueprint is created from a TOML file, e.g. [`blueprint.toml`](blueprint.toml):
+A new blueprint is created from a TOML file, e.g. [`blueprint.toml`](blueprint/blueprint.toml):
 
 ```
 $> composer-cli blueprints push blueprint.toml
@@ -197,7 +197,7 @@ Note, that we've switched the default 8080 port to 8000 on the host so we don't 
   
   The installer, anaconda, on the `boot.iso` installation medium can
 be used to install the commit. To configure the installer to use the
-newly build commit, a "kickstart" configuration [`edge.ks`](edge.ks),
+newly build commit, a "kickstart" configuration [`edge.ks`](ks/edge.ks),
 is used. It is setup for non-interactive, text-based installation.
 The important line within the kickstart is the `ostreesetup` directive
 which instructs the installer to fetch and deploy the commit.
@@ -249,7 +249,7 @@ mkksiso edge.ks rhel-baseos-8.x-x86_64-boot.iso boot.iso
 
 #### Build via the command line
 
-An empty blueprint is required to create an installer. An example TOML file is included in this repo, e.g. installer.toml:
+An empty blueprint is required to create an installer. An example TOML file is included in this repo, e.g. [`installer.toml`](blueprint/installer.toml):
 
 ```
 $> composer-cli blueprints push installer.toml
@@ -284,7 +284,7 @@ The same workflow is available in the web UI as well:
 
 #### Build via the command line
 
-A blueprint with 1) an empty packages section 2) a few additional options is required to create a simplified-installer image. An example TOML file is included in this repo, e.g. simplified-installer.toml (feel free to adjust this as needed for your environment):
+A blueprint with 1) an empty packages section 2) a few additional options is required to create a simplified-installer image. An example TOML file is included in this repo, e.g. [`simplified-installer.toml`](blueprint/simplified-installer.toml) (feel free to adjust this as needed for your environment):
 
 ```
 $> composer-cli blueprints push simplified-installer.toml
@@ -322,7 +322,7 @@ Before installing and provisioning the system, we need to configure FDO. Product
 ```
 $> yum -y install fdo-admin-cli && systemctl enable --now fdo-aio
 ```
-This will generate all the necessary configs and keys needed for FDO to work. This repo provides an alternate serviceinfo_api_server.yml file as an example to recreate the same demo as edge2.ks. To use file simply add the desired ssh key and add replace the service_info_auth_token & admin_auth_token from the serviceinfo_api_server.yml file that was generated on your system. Next, copy this file to /etc/fdo/aio/configs/, copy & extract device0.tgz under /etc/, and run `systemctl restart fdo-aio` for the changes to take effect. This assumes that you are provisioning a VM using UEFI w/ a TPM configured. Adjust /dev/vda as necessary to use with other environments. 
+This will generate all the necessary configs and keys needed for FDO to work. This repo provides an alternate serviceinfo_api_server.yml file as an example to recreate the same demo as [`edge2.ks`](ks/edge2.ks). To use file simply add the desired ssh key and add replace the service_info_auth_token & admin_auth_token from the serviceinfo_api_server.yml file that was generated on your system. Next, copy this file to /etc/fdo/aio/configs/, copy & extract device0.tgz under /etc/, and run `systemctl restart fdo-aio` for the changes to take effect. This assumes that you are provisioning a VM using UEFI w/ a TPM configured. Adjust /dev/vda as necessary to use with other environments. 
   
   
 </details>
@@ -331,7 +331,7 @@ This will generate all the necessary configs and keys needed for FDO to work. Th
 <details>
   <summary>Click to learn more about using Ignition to provide configuration </summary>
 
-Ignition is very similar to Cloud-Init and well supported with both rpm-ostree and the coreos-installer, both of which are used when a Simplified Installer image is created. We've converted the edge2.ks example into Ingition to serve as an example. Ingnition is intended to be machine generated & machine read. Our example will start with human readable/editable configs and converted using butane to render them for final use with the image. To embed the config in Image Builder's blueprint we will encode the file using base64. It may seem convoluded to go through this process, but it's super simple to automate and will make long-term maintenance easier for developers/admins. 
+Ignition is very similar to Cloud-Init and well supported with both rpm-ostree and the coreos-installer, both of which are used when a Simplified Installer image is created. We've converted the [`edge2.ks`](ks/edge2.ks) example into Ingition to serve as an example. Ingnition is intended to be machine generated & machine read. Our example will start with human readable/editable configs and converted using butane to render them for final use with the image. To embed the config in Image Builder's blueprint we will encode the file using base64. It may seem convoluded to go through this process, but it's super simple to automate and will make long-term maintenance easier for developers/admins. 
 
 One other thing worth noting is Ignition is capable of fetching remote configs. This is incredibly powerful if you control DNS and want systems in different zones to have different configs. It's also really helpful for iterating on the config as changes to the file won't require building a new installation image to embed the changes. We recommend embedding a stub config in your image that configures a user & ssh key and fetching the remaining options from a web server for doing development. While this same approach is perfectly fine for some production environments, others will benefit from embedding the complete config in the image. We are providing a complete example config as well called full.bu. 
 
@@ -359,7 +359,7 @@ Next, convert the config to base64. This is the form we need to insert into the 
 $> cat stub.ign| base64 > stub.ign.b64
 ```
 
-At this point, we will edit the simplified-installer-ign.toml blueprint and paste the contents of stub.ign.b64 inside the triple quotes of this section:
+At this point, we will edit the [`simplified-installer-ign.toml`](blueprint/simplified-installer-ign.toml) blueprint and paste the contents of stub.ign.b64 inside the triple quotes of this section:
 
 ```
 [customizations.ignition.embedded]
@@ -411,7 +411,7 @@ deployment can be restored via `rpm-ostree rollback`.
 
 ## RHEL for Edge Client Configuration Examples
 
-The second kickstart example, [`edge2.ks`](edge2.ks), will install the
+The second kickstart example, [`edge2.ks`](ks/edge2.ks), will install the
  same ostree commit as well as demonstrate the use of a few features in 
 `%post` that makes the OS much easier to manage when using a large 
 fleet of systems. To use this example simply adjust the kickstart 
@@ -421,7 +421,7 @@ inst.ks=http://10.0.2.2:8000/edge2.ks
 ```
 
 ###New in 9.2+ Using Image Builder's Expanded Blueprint Customizations
-We've converted all of the examples from [`edge2.ks`](edge2.ks) and an ostree commit (edge-container) generated using edge_demo.toml will contain all of these configurations. Often for more "enterprisy" environments it can be advantageous to separate OS & application configuration from the image. Environments like this typically benefit greatly from tools like ansible, puppet, etc. However, a lot of edge systems follow a pattern more similar to embedded devices where the image needs to be 100% preconfigured. This example blueprint will help guide you to create an OS image that is ready to run with any needed OS customizations, one of more traditional or containerized applications, and this can be installed using any of the methods described above (anaconda/kickstart, simplified-installer, etc).  
+We've converted all of the examples from [`edge2.ks`](ks/edge2.ks) and an ostree commit (edge-container) generated using [`edge_demo.toml`](blueprint/edge_demo.toml) will contain all of these configurations. Often for more "enterprisy" environments it can be advantageous to separate OS & application configuration from the image. Environments like this typically benefit greatly from tools like ansible, puppet, etc. However, a lot of edge systems follow a pattern more similar to embedded devices where the image needs to be 100% preconfigured. This example blueprint will help guide you to create an OS image that is ready to run with any needed OS customizations, one of more traditional or containerized applications, and this can be installed using any of the methods described above (anaconda/kickstart, simplified-installer, etc).  
 
 ### Nodes will automatically stage ostree updates
 As new OStree commits are created via Image Builder and made 

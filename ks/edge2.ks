@@ -64,3 +64,4 @@ Volume=/opt/appdata/boinc:/var/lib/boinc:Z
 WantedBy=default.target
 EOF
 %end
+
