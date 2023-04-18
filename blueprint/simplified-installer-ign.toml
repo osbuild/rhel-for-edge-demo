@@ -1,5 +1,5 @@
-name = "simplified_installer"
-description = "A rhel-edge simplified-installer image"
+name = "simplified_installer_ignition"
+description = "A rhel-edge simplified-installer image to use with ignition"
 version = "0.0.5"
 packages = []
 modules = []
