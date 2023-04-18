@@ -1,0 +1,15 @@
+name = "simplified_installer"
+description = "A rhel-edge simplified-installer image"
+version = "0.0.5"
+packages = []
+modules = []
+groups = []
+distro = ""
+
+[customizations]
+installation_device = "/dev/vda"
+
+[customizations.ignition.embedded]
+config = """
+"""
+

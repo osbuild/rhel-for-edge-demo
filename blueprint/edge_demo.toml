@@ -1,0 +1,66 @@
+name = "edge_demo"
+description = ""
+version = "0.0.2"
+packages = []
+modules = []
+groups = []
+distro = "rhel-92"
+
+[customizations.services]
+enabled = ["rpm-ostreed-automatic.timer", "podman-auto-update.timer", "applyupdate.timer"]
+
+[[customizations.directories]]
+path = "/etc/systemd/system/podman-auto-update.timer.d"
+
+[[customizations.files]]
+path = "/etc/systemd/system/podman-auto-update.timer.d/splay.conf"
+data = """[Timer]
+RandomizedDelaySec=7200"""
+
+[[customizations.files]]
+path = "/etc/containers/systemd/boinc.container"
+data = """[Service]
+Restart=always
+ExecStartPre=-/bin/mkdir -p /opt/appdata/boinc/slots
+ExecStartPre=-/bin/mkdir -p /opt/appdata/boinc/locale
+
+[Container]
+ContainerName=boinc
+Image=docker.io/boinc/client:latest
+Label="io.containers.autoupdate=image"
+Network=host
+PublishPort=31416:31416
+Timezone=local
+Volume=/opt/appdata/boinc:/var/lib/boinc:Z
+
+[Install]
+WantedBy=default.target"""
+
+[[customizations.files]]
+path = "/etc/rpm-ostreed.conf"
+data = """[Daemon]
+AutomaticUpdatePolicy=stage"""
+
+
+[[customizations.files]]
+path = "/etc/systemd/system/applyupdate.service"
+data = """[Unit]
+Description=Apply Update Check
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'if [[ $(rpm-ostree status -v | grep "Staged: yes") ]]; then systemctl --message="Applying OTA update" reboot; else logger "Running latest available update"; fi'"""
+
+[[customizations.files]]
+path = "/etc/systemd/system/applyupdate.timer"
+data = """[Unit]
+Description=Daily Update Reboot Check.
+
+[Timer]
+#Nightly example maintenance window
+#OnCalendar=*-*-* 01:30:00
+#weekly example for Sunday at midnight
+OnCalendar=Sun *-*-* 00:00:00
+
+[Install]
+WantedBy=multi-user.target"""

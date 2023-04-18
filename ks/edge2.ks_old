@@ -9,7 +9,8 @@ text
 network --bootproto=dhcp
 user --name=core --groups=wheel --password=edge
 
-ostreesetup --nogpg --url=http://10.0.2.2:8000/repo/ --osname=rhel --remote=edge --ref=rhel/8/x86_64/edge
+ostreesetup --nogpg --url=http://10.0.2.2:8000/repo/ --osname=rhel --remote=edge --ref=rhel/9/x86_64/edge
+#ostreesetup --nogpg --url=http://10.0.2.2:8000/repo/ --osname=rhel --remote=edge --ref=rhel/8/x86_64/edge
 %post
 
 #stage updates as they become available. This is highly recommended

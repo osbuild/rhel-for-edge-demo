@@ -9,4 +9,4 @@ text
 network --bootproto=dhcp
 user --name=core --groups=wheel --password=edge
 services --enabled=ostree-remount
-ostreesetup --nogpg --url=http://10.0.2.2:8000/repo/ --osname=rhel --remote=edge --ref=rhel/8/x86_64/edge
+ostreesetup --nogpg --url=http://10.0.2.2:8000/repo/ --osname=rhel --remote=edge --ref=rhel/9/x86_64/edge

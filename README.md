@@ -4,7 +4,7 @@ This demonstrates the use of [Image Builder](https://www.osbuild.org/) to
 create a (custom) RHEL for Edge [OSTree](https://ostree.readthedocs.io/en/latest/)
 commit and how to install those to a disk or a virtual machine image.
 
-The latest version of Image Builder can create several types of RHEL for Edge artifacts, all of these are essentially a delivery mechanism for the OSTree commit. Think of this as the OS image, as it literally contains the entire operating system. This demo will show how to create the initial OSTree commit, make it available via HTTP/HTTPS, install a system, and create updates.
+The latest version of Image Builder can create several types of RHEL for Edge artifacts, all of these are essentially a delivery mechanism for the OSTree commit. Think of this as the OS image, as it literally contains the entire operating system. This demo will show how to create the initial OSTree commit, make it available via HTTP/HTTPS, walkthrough several install paths, install a system, and create updates.
 
 ```
                       ┌─────────────────┐
@@ -31,29 +31,29 @@ The latest version of Image Builder can create several types of RHEL for Edge ar
 
 ## Requirements
 
-Install Image Builder on the latest release of [RHEL](https://access.redhat.com/pilot-documentation/red_hat_enterprise_linux/8).
+Install Image Builder on the latest release of [RHEL](https://developers.redhat.com/products/rhel/download).
 8.3 is the minimal required version, but this demo will include features from
-later releases. The *KVM Guest Image* is used to install Image Builder and build a
+later releases. We recommend using RHEL 9.2 or later. The *KVM Guest Image* is used to install Image Builder and build a
 RHEL for Edge commit. The *Boot ISO* is then used to install that commit. 
 
 Name            | Filename
 ----------------|-------------------------
-Boot ISO        | rhel-8.x-x86_64-boot.iso
-KVM Guest Image | rhel-8.x-x86_64-kvm.qcow2
+Boot ISO        | rhel-baseos-9.x-x86_64-boot.iso
+KVM Guest Image | rhel-baseos-9.x-x86_64-kvm.qcow2
 
 
 ## Install Image Builder
 
 ### Run RHEL inside a virtual machine
 
-A small helper script is used to start the RHEL 8.x Guest Image. It uses
+A small helper script is used to start the RHEL 9.x Guest Image. It uses
 [cloud-init](https://cloudinit.readthedocs.io/en/latest/) to provision a
 `root` user (password `r`). The script also enables port forwarding for
 the ssh and web console ports (`22` → `2222` (host) and
 `9090` → `9091`).
 
 ```
-vm --persist rhel-8.x-x86_64-kvm.qcow2
+vm --persist rhel-baseos-9.x-x86_64-kvm.qcow2
 ```
 
 ### Register the system
@@ -166,7 +166,7 @@ The `ostree` and `rpm-ostree` commands can be used to inspect the contents:
 The list of rpm packages included in the commit can be listed via
 ```
 # print a list of packages in the commit
-rpm-ostree db list rhel/8/x86_64/edge --repo=repo
+rpm-ostree db list rhel/9/x86_64/edge --repo=repo
 ```
 </details>
 
@@ -181,12 +181,13 @@ Import & tag the container
 ```
 $> skopeo copy oci-archive:<UUID>-container.tar containers-storage:localhost/rfe-mirror:latest
 ```
-Run the container
+Run the container. Tip! We can also mount other files we want to serve via the same container. This example is going to serve a kickstart file and the same thing will work with ignition configs.
 ```
 $> podman run --rm -p 8000:8080 -v ./edge.ks:/var/www/html/edge.ks:z rfe-mirror
 ```
 
 The repo will now be available at http://10.0.2.2:8000/repo and the supplied kickstart at http://10.0.2.2:8000/edge.ks
+Note, that we've switched the default 8080 port to 8000 on the host so we don't collide with the optional FDO components described later on. If you're not using FDO, then sticking with port 8080 is a great choice.
 
 ### Network Install using Anaconda
 <details>
@@ -235,7 +236,7 @@ command line, the `mkksiso` (`lorax` package) can be used to inject
 the kickstart file into the boot iso:
 
 ```
-mkksiso edge.ks rhel-8.4-x86_64-boot.iso boot.iso
+mkksiso edge.ks rhel-baseos-8.x-x86_64-boot.iso boot.iso
 ```
 </details>
 
@@ -264,7 +265,7 @@ When the compose is complete download the ISO
 
 ```
 $> composer-cli compose image <uuid>
-<uuid>-rhel84-boot.iso: 1646.39 MB
+<uuid>-rhel-boot.iso: 1646.39 MB
 ```
 
 The installer image can be written to optical or flash media using standard methods. A streamlined UI is provided for network & storage configuration and a kickstart can be injected for further customizations and fully automated installs. 
@@ -278,7 +279,7 @@ The same workflow is available in the web UI as well:
 <details>
   <summary>Click to create an Simplified Installer Image w/ FDO</summary>
   
-  The Simplified Installer uses coreos-install to write the OStree commit straight to disk. This means there's no need to embed a kickstart config, and any customization can be applied via FDO, or any external management tool. This is a perfect way to flash systems, ship them, have them onboard when they're deployed in the field, and then pass any sensative data over the secure FDO channel. coreos-install can deploy from an ISO, USB, or via a network install. Please note that only UEFI firmware is supported.
+  FDO is a great technology that aims to automate & secure device onboarding in Edge environments. If you're not familiar with the technology [this video](https://www.youtube.com/watch?v=_nq5IAVbl2Y) is a good intro. FDO is currently only available via the Simplified Installer. This installation path uses coreos-install to write the OStree commit straight to disk. This means there's no need to embed a kickstart config, and any customization can be applied via FDO or any external management tool like Ansible. This is a perfect way to flash systems, ship them, verify the device's integrity, onboard once they're deployed in the field, and then pass any sensative data over the secure FDO channel. coreos-install can deploy from an ISO, USB, or via a network install. Please note that only UEFI firmware is supported.
   
 
 #### Build via the command line
@@ -326,6 +327,54 @@ This will generate all the necessary configs and keys needed for FDO to work. Th
   
 </details>
 
+### Using Ignition to apply configuration with the Simplified Installer
+<details>
+  <summary>Click to learn more about using Ignition to provide configuration </summary>
+
+Ignition is very similar to Cloud-Init and well supported with both rpm-ostree and the coreos-installer, both of which are used when a Simplified Installer image is created. We've converted the edge2.ks example into Ingition to serve as an example. Ingnition is intended to be machine generated & machine read. Our example will start with human readable/editable configs and converted using butane to render them for final use with the image. To embed the config in Image Builder's blueprint we will encode the file using base64. It may seem convoluded to go through this process, but it's super simple to automate and will make long-term maintenance easier for developers/admins. 
+
+One other thing worth noting is Ignition is capable of fetching remote configs. This is incredibly powerful if you control DNS and want systems in different zones to have different configs. It's also really helpful for iterating on the config as changes to the file won't require building a new installation image to embed the changes. We recommend embedding a stub config in your image that configures a user & ssh key and fetching the remaining options from a web server for doing development. While this same approach is perfectly fine for some production environments, others will benefit from embedding the complete config in the image. We are providing a complete example config as well called full.bu. 
+
+The process 
+
+#### Editing and rendering Ignition config
+
+These steps can be run from the system that has Image Builder installed on it. Begin by editing the stub.bu config in this repo. Add your ssh key and web server that is hosting the remote configuration that we will render. The password hash continues to use the same demo password of "edge" (please change this before using in production). If you prefer to use a complete config instead of the stub, replace full.bu in place of stub.bu in the steps below.
+
+Once the file has been updated, we'll use butane to render the json config for Ignition.
+
+```
+$> podman run -i --rm quay.io/coreos/butane:release \
+       --pretty --strict < stub.bu > stub.ign
+```
+
+Next, let's render the remote side of the config.
+```
+$> run -i --rm quay.io/coreos/butane:release \
+       --pretty --strict < remote.bu > remote.ign
+```
+
+Next, convert the config to base64. This is the form we need to insert into the blueprint.
+```
+$> cat stub.ign| base64 > stub.ign.b64
+```
+
+At this point, we will edit the simplified-installer-ign.toml blueprint and paste the contents of stub.ign.b64 inside the triple quotes of this section:
+
+```
+[customizations.ignition.embedded]
+config = """
+```
+
+Now we're ready to generate the installer image. Start a `edge-simplified-installer` compose for the blueprint created in the previous step. Passing the --url to the OSTree repository of the commit to embed in the image.
+```
+$> composer-cli compose start-ostree simplified-installer-ign edge-simplified-installer --url http://10.0.2.2:8000/repo/
+Compose 51et1e4e-ad76-4cbd-b875-94c69a9d4dxq added to the queue
+```
+
+When the compose is complete download, boot the ISO, and be amazed! It's worth noting that Ignition can be used with or without FDO, and this is incredibly flexible and powerful capabilities. While there are overlapping capabilities with Ignition & FDO, and we recommend using choosing a path that makes sense for your environment. 
+
+</details>
 
 ## Create Image Updates
 
@@ -371,6 +420,9 @@ being used:
 inst.ks=http://10.0.2.2:8000/edge2.ks
 ```
 
+###New in 9.2+ Using Image Builder's Expanded Blueprint Customizations
+We've converted all of the examples from [`edge2.ks`](edge2.ks) and an ostree commit (edge-container) generated using edge_demo.toml will contain all of these configurations. Often for more "enterprisy" environments it can be advantageous to separate OS & application configuration from the image. Environments like this typically benefit greatly from tools like ansible, puppet, etc. However, a lot of edge systems follow a pattern more similar to embedded devices where the image needs to be 100% preconfigured. This example blueprint will help guide you to create an OS image that is ready to run with any needed OS customizations, one of more traditional or containerized applications, and this can be installed using any of the methods described above (anaconda/kickstart, simplified-installer, etc).  
+
 ### Nodes will automatically stage ostree updates
 As new OStree commits are created via Image Builder and made 
 avaialable, clients will stage the updates locally. Enable staging 
@@ -384,12 +436,15 @@ style problems, thus making the this means of application
 packaging perfect for long life devices deployed outside of 
 traditional data centers. Podman natively supports systemd as a 
 manager and this results in one of the lightest weight solutions 
-for running containers. The boinc example container shows a 
-modified unit file generated by `podman generate systemd`. systemd 
+for running containers. This demo originally showed an example boinc container 
+systemd unit file generated by `podman generate systemd`. systemd 
 will ensure the `container-boinc.service` is running at startup 
 and in the case that it fails at runtime, automatically restarted 
-via `Restart=on-failure`. This same concept can apply to multiple 
-containers and/or pods.
+via `Restart=always`. With the release of RHEL 9.2, Podman now include support
+for Quadlet. We have updated the examples in the repo to use Quadlet rather than
+generating unit files. The end result is the same, but Quadlet is the prefered mechanism moving foward.
+This same concept extends to multiple containers and/or pods and these configs can easily be included in 
+images or managed independently via Ansible (or similar tools).
 
 ### Automatically update Containers
 Podman has recently implemented the ability to automatically update 

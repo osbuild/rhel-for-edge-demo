@@ -1,0 +1,14 @@
+variant: r4e
+version: 1.0.0
+ignition:
+  config:
+    merge:
+      - source: http://path-to/ign/remote.ign
+passwd:
+  users:
+    - name: core
+      groups:
+        - wheel
+      password_hash: $y$j9T$3F1aS4Q56GjixkuY3blcX.$M2WV2kJ7hi1XOkdexQMkBqaDWizidOMcIiCvZU15XW/
+      ssh_authorized_keys:
+        - ssh-rsa AAAA........

@@ -1,0 +1,79 @@
+variant: r4e
+version: 1.0.0
+ignition:
+passwd:
+  users:
+    - name: core
+      groups:
+        - wheel
+      password_hash: $y$j9T$3F1aS4Q56GjixkuY3blcX.$M2WV2kJ7hi1XOkdexQMkBqaDWizidOMcIiCvZU15XW/
+      ssh_authorized_keys:
+        - ssh-rsa AAAA........
+systemd:
+  units:
+    - name: applyupdate.service
+      contents: |
+        [Unit]
+        Description=Apply Update Check
+
+        [Service]
+        Type=oneshot
+        ExecStart=/bin/sh -c 'if [[ $(rpm-ostree status -v | grep "Staged: yes") ]]; then systemctl --message="Applying OTA update" reboot; else logger "Running latest available update"; fi'
+        [Install]
+        WantedBy=multi-user.target
+        
+    - name: applyupdate.timer
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Daily Update Reboot Check
+
+        [Timer]
+        #Nightly example maintenance window
+        OnCalendar=*-*-* 01:30:00
+        #weekly example for Sunday at midnight
+        #OnCalendar=Sun *-*-* 00:00:00
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: podman-auto-update.timer
+      enabled: true
+      dropins: 
+        - name: splay.conf
+          contents: |
+            [Timer]
+            RandomizedDelaySec=7200
+
+    - name: rpm-ostreed-automatic.timer
+      enabled: true
+
+storage:
+  files:
+    - path: /etc/containers/systemd/boinc.container
+      mode: 0600
+      contents:
+        inline: |
+          [Service]
+          Restart=always
+          ExecStartPre=-/bin/mkdir -p /opt/appdata/boinc/slots
+          ExecStartPre=-/bin/mkdir -p /opt/appdata/boinc/locale
+  
+          [Container]
+          ContainerName=boinc
+          Image=docker.io/boinc/client:latest
+          Label="io.containers.autoupdate=image"
+          Network=host
+          PublishPort=31416:31416
+          Timezone=local
+          Volume=/opt/appdata/boinc:/var/lib/boinc:Z
+  
+          [Install]
+          WantedBy=default.target
+
+    - path: /etc/rpm-ostree.conf
+      mode: 0600
+      contents:
+        inline: |
+          [Daemon]
+          AutomaticUpdatePolicy=stage

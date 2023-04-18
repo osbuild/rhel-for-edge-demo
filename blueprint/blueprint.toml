@@ -2,6 +2,6 @@ name = "Edge"
 description = ""
 version = "0.0.1"
 
-[[modules]]
+[[packages]]
 name = "crun"
 version = "*"
