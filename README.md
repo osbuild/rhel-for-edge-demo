@@ -350,7 +350,7 @@ $> podman run -i --rm quay.io/coreos/butane:release \
 
 Next, let's render the remote side of the config.
 ```
-$> run -i --rm quay.io/coreos/butane:release \
+$> podman run -i --rm quay.io/coreos/butane:release \
        --pretty --strict < remote.bu > remote.ign
 ```
 
