@@ -1,6 +1,5 @@
 variant: r4e
 version: 1.0.0
-ignition:
 passwd:
   users:
     - name: core
