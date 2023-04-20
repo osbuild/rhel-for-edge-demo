@@ -420,7 +420,7 @@ being used:
 inst.ks=http://10.0.2.2:8000/edge2.ks
 ```
 
-###New in 9.2+ Using Image Builder's Expanded Blueprint Customizations
+### New in 9.2+ Using Image Builder's Expanded Blueprint Customizations
 We've converted all of the examples from [`edge2.ks`](ks/edge2.ks) and an ostree commit (edge-container) generated using [`edge_demo.toml`](blueprint/edge_demo.toml) will contain all of these configurations. Often for more "enterprisy" environments it can be advantageous to separate OS & application configuration from the image. Environments like this typically benefit greatly from tools like ansible, puppet, etc. However, a lot of edge systems follow a pattern more similar to embedded devices where the image needs to be 100% preconfigured. This example blueprint will help guide you to create an OS image that is ready to run with any needed OS customizations, one of more traditional or containerized applications, and this can be installed using any of the methods described above (anaconda/kickstart, simplified-installer, etc).  
 
 ### Nodes will automatically stage ostree updates
