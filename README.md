@@ -185,7 +185,7 @@ $> skopeo copy oci-archive:<UUID>-container.tar containers-storage:localhost/rfe
 ```
 Run the container. Tip! We can also mount other files we want to serve via the same container. This example is going to serve a kickstart file and the same thing will work with ignition configs.
 ```
-$> podman run --rm -p 8000:8080 -v ./edge.ks:/var/www/html/edge.ks:z rfe-mirror
+$> podman run -d --rm -p 8000:8080 -v ./edge.ks:/var/www/html/edge.ks:z rfe-mirror
 ```
 
 The repo will now be available at http://10.0.2.2:8000/repo and the supplied kickstart at http://10.0.2.2:8000/edge.ks
